@@ -34,9 +34,9 @@ class GameAgent:
 
     # define functions to perform actions using spaceGame object
     def go_left(self):
-        self.spaceGame.press_left()
+        self.spaceGame.move_left()
     def go_right(self):
-        self.spaceGame.press_right()
+        self.spaceGame.move_right()
     def no_movement(self):
         self.spaceGame.no_action()
     
