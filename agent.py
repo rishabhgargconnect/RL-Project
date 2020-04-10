@@ -17,30 +17,26 @@ OPTIONAL ADDITIONS :
 fire bullets
 if bullet wasted, negative rewards
 
-
-class DinoAgent:
-    def __init__(self,game):
-        self.dinoGame = game; 
-        self.jump(); 
-    def is_running(self):
-        return self.dinoGame.get_playing()
-    def is_crashed(self):
-        return self.dinoGame.get_crashed()
-    def jump(self):
-        self.dinoGame.press_up()
-    def duck(self):
-        self.dinoGame.press_down()
-    def DoNothing(self):
-        self.dinoGame.press_right()
-
 """
 
 class GameAgent:
+
+    # initialize the class
     def __init__(self,game_object):
         self.spaceGame = game_object
-        self.noMovement()
+        self.no_movement()
+
+    # define functions to check the state of agent
     def is_alive(self):
         return self.spaceGame.get_alive()
     def is_dead(self):
-        
+        return self.spaceGame.get_dead()
+
+    # define functions to perform actions using spaceGame object
+    def go_left(self):
+        self.spaceGame.move_left()
+    def go_right(self):
+        self.spaceGame.move_right()
+    def no_movement(self):
+        self.spaceGame.no_action()
     
