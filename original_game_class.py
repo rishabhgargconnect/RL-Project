@@ -6,80 +6,43 @@ import math
 from pygame import mixer
 
 class SpaceShooterGame:
+    #Global Variables
+    game_over = False
 
-    def __init__(self):
-        game_over = False
+    # initialize the pygame (important step)
+    pygame.init()
+    # display by creating a screen which takes height and width as input
+    height = 600
+    width = 800
+    slack_right = 100
+    slack_left = 10
+    screen = pygame.display.set_mode((width,height))
+    score = 0
+    num_enemy = 6
+    # the display will persist only for few milliseconds if not in a loop
+    # we can control this using keys or checking for quit events
+    # in pygame easy to look for events, loop over all events and 
+    # check if the event being selected(key pressed) corresponds to quit
+    # if it is quit then change flag value
 
-        # initialize the pygame (important step)
-        pygame.init()
-        # display by creating a screen which takes height and width as input
-        height = 600
-        width = 800
-        slack_right = 100
-        slack_left = 10
-        screen = pygame.display.set_mode((width,height))
-        score = 0
-        num_enemy = 6
-        background_img = pygame.image.load('images/background/background_7.jpg')
+    # background
+    background_img = pygame.image.load('images/background/background_7.jpg')
 
-        mixer.music.load('audio/background.wav')
-        mixer.music.play(-1)
+    # background sound
+    mixer.music.load('audio/background.wav')
+    mixer.music.play(-1)
 
-        # title and icon
-        # title reference : self-innovation
-        # icon reference : Icons made by flaticon.com
-        pygame.display.set_caption('   Space Fighter')
-        icon = pygame.image.load('images/icon/icon_ufo.png')
-        pygame.display.set_icon(icon)
+    # title and icon
+    # title reference : self-innovation
+    # icon reference : Icons made by flaticon.com
+    pygame.display.set_caption('   Space Fighter')
+    icon = pygame.image.load('images/icon/icon_ufo.png')
+    pygame.display.set_icon(icon)
 
-        # display score on screen
-        font = pygame.font.Font('freesansbold.ttf',16)
-        text_x = 10
-        text_y = 10
-
-        player_img = pygame.image.load('images/battleship/battleship_8.png')
-        player_x = 370
-        player_y = 480
-        direction_for_player = 1
-        player_x_speed_change = 5
-        player_y_speed_change = 1
-        player_x_pos_change = 0
-        player_y_pos_change = 0
-
-        enemy_img = [pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png')]
-        
-        enemy_x = []
-        enemy_y = []
-        enemy_x_pos_change = []
-        enemy_y_pos_change = []
-        enemy_x_speed_change = []
-        enemy_y_speed_change = []
-        direction_for_enemy = []
-        for e in range(0,num_enemy):
-            enemy_x.append(random.randint(10,700))
-            enemy_y.append(random.randint(10,200))
-            direction_for_enemy.append(random.choice([-1,1]))
-            # we want enemy to move left and right
-            enemy_x_speed_change.append(3)
-            # we want enemy to go down when it hits boundary
-            enemy_y_speed_change.append(50)
-            enemy_x_pos_change.append(0)
-            enemy_y_pos_change.append(0)
-
-        bullet_img = pygame.image.load('images/bullet/bullet_1.png')
-    # coordinates are given such that player appears in the middle of screen
-    bullet_x = player_x + 35
-    bullet_y = player_y
-    bullet_y_speed_change = 10
-    bullet_x_pos_change = bullet_x
-    bullet_y_pos_change = bullet_y
-
-
+    # display score on screen
+    font = pygame.font.Font('freesansbold.ttf',16)
+    text_x = 10
+    text_y = 10
     def display_score(x,y):
         score_display = font.render("Score : "+str(score),True,(255,255,255))
         screen.blit(score_display,(x,y))
@@ -90,10 +53,50 @@ class SpaceShooterGame:
         over_text = font.render('GAME OVER',True,(255,255,255))
         screen.blit(over_text,(x,y))
 
+    # PLAYER [BATTLESHIP]
+    # image for player
+    player_img = pygame.image.load('images/battleship/battleship_8.png')
+    # coordinates are given such that player appears in the middle of screen
+    player_x = 370
+    player_y = 480
+    direction_for_player = 1
+    player_x_speed_change = 5
+    player_y_speed_change = 1
+    player_x_pos_change = 0
+    player_y_pos_change = 0
+    # function for player
     def player(x,y):
         # to draw something on screen, blit is used
         screen.blit(player_img,(x,y))
 
+
+    # ENEMY [ALIEN]
+    # image for enemy
+    enemy_img = [pygame.image.load('images/alien/alien_1.png'),
+                    pygame.image.load('images/alien/alien_1.png'),
+                    pygame.image.load('images/alien/alien_1.png'),
+                    pygame.image.load('images/alien/alien_1.png'),
+                    pygame.image.load('images/alien/alien_1.png'),
+                    pygame.image.load('images/alien/alien_1.png')]
+    # coordinates are given such that player appears in the middle of screen
+
+    enemy_x = []
+    enemy_y = []
+    enemy_x_pos_change = []
+    enemy_y_pos_change = []
+    enemy_x_speed_change = []
+    enemy_y_speed_change = []
+    direction_for_enemy = []
+    for e in range(0,num_enemy):
+        enemy_x.append(random.randint(10,700))
+        enemy_y.append(random.randint(10,200))
+        direction_for_enemy.append(random.choice([-1,1]))
+        # we want enemy to move left and right
+        enemy_x_speed_change.append(3)
+        # we want enemy to go down when it hits boundary
+        enemy_y_speed_change.append(50)
+        enemy_x_pos_change.append(0)
+        enemy_y_pos_change.append(0)
     # function for enemy
     def enemy(i,x,y):
         # to draw something on screen, blit is used
@@ -102,7 +105,13 @@ class SpaceShooterGame:
     # BULLET
     # bullet will have 2 states, when it is ready for fire
     # and when it is fired
-    
+    bullet_img = pygame.image.load('images/bullet/bullet_1.png')
+    # coordinates are given such that player appears in the middle of screen
+    bullet_x = player_x + 35
+    bullet_y = player_y
+    bullet_y_speed_change = 10
+    bullet_x_pos_change = bullet_x
+    bullet_y_pos_change = bullet_y
     # ready state means we cannot see bullet on screen
     # fire means the bullet is moving
     # function for bullet
