@@ -10,3 +10,9 @@ STEPS :
 6. returns done true or false
 
 """
+
+class GameState:
+    def __init__(self):
+        self.agent = agent
+    def screenshot(self):
+        self.screenshot = self.
