@@ -225,15 +225,15 @@ class SpaceShooterGame:
         self.enemy_y_speed_change = []
         self.enemy_direction = []
         for e in range(0,self.num_enemy):
-            self.enemy_x.append(random.randint(self.width/100,self.width-self.width/10))
-            self.enemy_y.append(random.randint(self.height/90,self.height/70))
+            self.enemy_x.append(random.randint(int(self.width/100),int(self.width-self.width/10)))
+            self.enemy_y.append(random.randint(int(self.height/90),int(self.height/70)))
             self.enemy_direction.append(random.choice([-1,1]))
             self.enemy_x_speed_change.append(3)
             self.enemy_y_speed_change.append(50)
         # bullet
         self.bullet_x = self.player_x + 35
         self.bullet_y = self.player_y
-        self.bullet_y_speed_change = 10
+        self.bullet_y_speed_change = 5
         self.bullet_x_pos_change = self.bullet_x
         self.bullet_y_pos_change = self.bullet_y
 

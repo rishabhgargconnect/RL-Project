@@ -74,13 +74,17 @@ import numpy as np
 import random
 from original_game_class import SpaceShooterGame
 
-game = SpaceShooterGame()
 
-while game.get_game_over()==False:
-    actions = np.zeros((3))
-    actions[random.choice([0,1,2])]=1
-    # actions[2]=1
+for i in range(2):
+    # no need for restart, just make object for the game class again and run it
+    game = SpaceShooterGame()
+    while game.get_game_over()==False:
+        actions = np.zeros((3))
+        actions[random.choice([0,1,2])]=1
+        # actions[2]=1
 
-    game.perform_one_step(actions)
-    game.quit_game()
-    # pygame.display.update()
+        game.perform_one_step(actions)
+        game.quit_game()
+    print('The end')
+        # pygame.display.update()
+    # game.restart_game()
