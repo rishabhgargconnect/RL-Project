@@ -4,258 +4,249 @@ import pygame
 import random
 import math
 from pygame import mixer
+pygame.init()
 
 class SpaceShooterGame:
-    #Global Variables
-    game_over = False
+    def __init__(self):
 
-    # initialize the pygame (important step)
-    pygame.init()
-    # display by creating a screen which takes height and width as input
-    height = 600
-    width = 800
-    slack_right = 100
-    slack_left = 10
-    screen = pygame.display.set_mode((width,height))
-    score = 0
-    num_enemy = 6
-    # the display will persist only for few milliseconds if not in a loop
-    # we can control this using keys or checking for quit events
-    # in pygame easy to look for events, loop over all events and 
-    # check if the event being selected(key pressed) corresponds to quit
-    # if it is quit then change flag value
+        # game initializations
+        self.height = 600
+        self.width = 800
+        self.slack_right = self.width/10
+        self.slack_left = self.width/100
+        self.screen = pygame.display.set_mode((self.width,self.height))
+        mixer.music.load('audio/background.wav')
+        mixer.music.play(-1)
+        self.c_sound = mixer.Sound('audio/explosion.wav')
+        self.bullet_sound = mixer.Sound('audio/laser.wav')
+        pygame.display.set_caption('   Space Fighter')
+        self.icon = pygame.image.load('images/icon/icon_ufo.png')
+        pygame.display.set_icon(self.icon)
+        self.font = pygame.font.Font('freesansbold.ttf',16)
 
-    # background
-    background_img = pygame.image.load('images/background/background_7.jpg')
+        # load images
+        self.background_img = pygame.image.load('images/background/background_7.jpg')
+        self.player_img = pygame.image.load('images/battleship/battleship_8.png')
+        self.enemy_img = [pygame.image.load('images/alien/alien_1.png'),
+                            pygame.image.load('images/alien/alien_1.png'),
+                            pygame.image.load('images/alien/alien_1.png'),
+                            pygame.image.load('images/alien/alien_1.png'),
+                            pygame.image.load('images/alien/alien_1.png'),
+                            pygame.image.load('images/alien/alien_1.png')]
+        self.bullet_img = pygame.image.load('images/bullet/bullet_1.png')
 
-    # background sound
-    mixer.music.load('audio/background.wav')
-    mixer.music.play(-1)
+        # game variables
+        self.game_over = False
+        self.high_score = 0
+        self.score = 0
+        self.num_enemy = 6
 
-    # title and icon
-    # title reference : self-innovation
-    # icon reference : Icons made by flaticon.com
-    pygame.display.set_caption('   Space Fighter')
-    icon = pygame.image.load('images/icon/icon_ufo.png')
-    pygame.display.set_icon(icon)
+        # component variables
+        #player
+        self.player_x = (self.width-50)/2
+        self.player_y = (self.height-self.height/5)
+        self.player_x_speed_change = 5
+        self.player_y_speed_change = 0
+        #enemy
+        self.enemy_x = []
+        self.enemy_y = []
+        self.enemy_x_speed_change = []
+        self.enemy_y_speed_change = []
+        self.enemy_direction = []
+        for e in range(0,self.num_enemy):
+            self.enemy_x.append(random.randint(int(self.width/100),int(self.width-self.width/10)))
+            self.enemy_y.append(random.randint(int(self.height/90),int(self.height/70)))
+            self.enemy_direction.append(random.choice([-1,1]))
+            self.enemy_x_speed_change.append(3)
+            self.enemy_y_speed_change.append(50)
+        # bullet
+        self.bullet_x = self.player_x + 35
+        self.bullet_y = self.player_y
+        self.bullet_y_speed_change = 10
+        self.bullet_x_pos_change = self.bullet_x
+        self.bullet_y_pos_change = self.bullet_y
+    
+    # SETTERS AND GETTERS
+    # for game initializations
+    def set_height(self,height):
+        self.height = height
+    def get_height(self):
+        return self.height
+    def set_width(self,width):
+        self.width = width
+    def get_width(self):
+        return self.width
+    # for game variables
+    def set_score(self,score):
+        self.score = score
+    def get_score(self):
+        return self.score
+    def set_high_score(self,score):
+        self.high_score = high_score
+    def get_high_score(self):
+        return self.high_score
+    def set_enemy_count(self,count):
+        self.num_enemy = count
+    def get_enemy_count(self):
+        return self.num_enemy
+    def set_game_over(self,flag):
+        self.game_over=flag
+    def get_game_over(self):
+        return self.game_over
+    # for component variables
+    def set_player_x(self,x):
+        self.player_x = x
+    def get_player_x(self):
+        return self.player_x
+    def set_player_y(self,y):
+        self.player_y = y
+    def get_player_y(self):
+        return self.player_y
+    def set_enemy_x(self,enemy_number,x):
+        self.enemy_x[enemy_number]=x
+    def get_enemy_x(self,enemy_number):
+        return self.enemy_x[enemy_number]
+    def set_enemy_y(self,enemy_number,y):
+        self.enemy_y[enemy_number]=y
+    def get_enemy_y(self,enemy_number):
+        return self.enemy_y[enemy_number]
+    def set_bullet_x(self,x):
+        self.bullet_x = x
+    def get_bullet_x(self):
+        return self.bullet_x
+    def set_bullet_y(self,y):
+        self.bullet_y = y
+    def get_bullet_y(self):
+        return self.bullet_y
+    def set_bullet_speed(self,speed):
+        self.bullet_y_speed_change = speed
+    def get_bullet_speed(self):
+        return self.bullet_y_speed_change
+    def set_player_speed(self,speed):
+        self.player_x_speed_change = speed
+    def get_player_speed(self):
+        return self.player_x_speed_change
 
-    # display score on screen
-    font = pygame.font.Font('freesansbold.ttf',16)
-    text_x = 10
-    text_y = 10
-    def display_score(x,y):
-        score_display = font.render("Score : "+str(score),True,(255,255,255))
-        screen.blit(score_display,(x,y))
+    # component blit functions
+    def player(self,x,y):
+        self.screen.blit(self.player_img,(x,y))
+    def enemy(self,enemy_number,x,y):
+        self.screen.blit(self.enemy_img[enemy_number],(x,y))
+    def bullet(self,x,y):
+        self.screen.blit(self.bullet_img,(x,y))
 
-    # GAME OVER
-    def game_over(x,y):
-        is_game_over = True
-        over_text = font.render('GAME OVER',True,(255,255,255))
+    # player movements (game controls)
+    def move_left(self):
+        self.player_x+= -1 * self.player_x_speed_change
+        if self.player_x<self.slack_left:
+            self.player_x=self.slack_left
+    def move_right(self):
+        self.player_x+= 1 * self.player_x_speed_change
+        if self.player_x>self.slack_right:
+            self.player_x=self.slack_right
+    def no_action(self):
+        self.player_x = self.player_x
+    
+    # bullet and enemy movements (automatic)
+    def fire_bullet(self):
+        self.bullet_y_pos_change-=self.bullet_y_speed_change
+        if self.bullet_y_pos_change<0:
+            self.bullet_sound.play()
+            self.bullet_y_pos_change = self.bullet_y 
+            self.bullet_x_pos_change = self.player_x + 35
+    def move_all_enemies(self):
+        for e in range(0,self.num_enemy):
+            self.enemy_x[e] += self.enemy_x_speed_change[e]*self.enemy_direction[e]
+            if self.enemy_x[e]>self.width-self.slack_right:
+                self.enemy_direction[e] = -1
+                self.enemy_y[e] += self.enemy_y_speed_change[e]
+            if self.enemy_x[e]<self.slack_left:
+                self.enemy_direction[e] = 1
+                self.enemy_y[e] += self.enemy_y_speed_change[e]
+
+    # COLLISIONS & GAME OVER
+    def check_collision_enemy_bullet(self,e_x,e_y,b_x,b_y):
+        return math.sqrt((e_x-b_x)**2 + (e_y-b_y)**2)<40
+    def update_collision_effects(self,e):
+        if self.check_collision_enemy_bullet(self.enemy_x[e],self.enemy_y[e],self.bullet_x,self.bullet_y):
+            self.c_sound.play()
+            self.bullet_y_pos_change = self.bullet_y 
+            self.bullet_x_pos_change = self.player_x + 35
+            self.score += 1
+            self.enemy_x[e] = random.randint(self.width/100,self.width-self.width/10)
+            self.enemy_y[e] = random.randint(self.height/90,self.height/70)
+            self.enemy_direction[e] = random.choice([-1,1])
+            # print(self.score)
+    def check_collision_enemy_player(self):
+        for e in range(0,self.num_enemy):
+            distance_from_player = math.sqrt((self.enemy_x[e]-self.player_x)**2 + (self.enemy_y[e]-self.player_y)**2)
+            if distance_from_player<50:
+                self.game_over = True
+                for e1 in range(0,self.num_enemy):
+                    self.enemy_y[e1] = self.height + 1000
+                self.bullet_y_speed_change = 0
+                self.bullet_y_pos_change = self.height + 1000 
+                self.game_over_display(self.height/2,self.width/2)
+    def check_enemy_game_over_boundary(self):
+        for e in range(0,self.num_enemy):
+            if self.enemy_y[e]>self.height-self.height/10:
+                self.game_over = True
+                for e1 in range(0,self.num_enemy):
+                    self.enemy_y[e1] = self.height + 1000
+                self.bullet_y_speed_change = 0
+                self.bullet_y_pos_change = self.height + 1000 
+                self.bullet_x_pos_change = player_x + 35
+                self.game_over_display(self.height/2,self.width/2)
+        
+    # GAME DISPLAYS
+    def score_display(self,x,y):
+        score_display = self.font.render("Score : "+str(self.score),True,(255,255,255))
+        self.screen.blit(score_display,(x,y))
+    def game_over_display(self,x,y):
+        self.game_over = True
+        over_text = self.font.render('GAME OVER',True,(255,255,255))
         screen.blit(over_text,(x,y))
 
-    # PLAYER [BATTLESHIP]
-    # image for player
-    player_img = pygame.image.load('images/battleship/battleship_8.png')
-    # coordinates are given such that player appears in the middle of screen
-    player_x = 370
-    player_y = 480
-    direction_for_player = 1
-    player_x_speed_change = 5
-    player_y_speed_change = 1
-    player_x_pos_change = 0
-    player_y_pos_change = 0
-    # function for player
-    def player(x,y):
-        # to draw something on screen, blit is used
-        screen.blit(player_img,(x,y))
+    # RESTART
+    def restart_game(self):
+        # RE-INITIALIZE
+        # game variables
+        self.game_over = False
+        self.score = 0
 
+        # component variables
+        #player
+        self.player_x = (self.width-50)/2
+        self.player_y = (self.height-self.height/5)
+        self.player_x_speed_change = 5
+        self.player_y_speed_change = 0
+        #enemy
+        self.enemy_x = []
+        self.enemy_y = []
+        self.enemy_x_speed_change = []
+        self.enemy_y_speed_change = []
+        self.enemy_direction = []
+        for e in range(0,self.num_enemy):
+            self.enemy_x.append(random.randint(self.width/100,self.width-self.width/10))
+            self.enemy_y.append(random.randint(self.height/90,self.height/70))
+            self.enemy_direction.append(random.choice([-1,1]))
+            self.enemy_x_speed_change.append(3)
+            self.enemy_y_speed_change.append(50)
+        # bullet
+        self.bullet_x = self.player_x + 35
+        self.bullet_y = self.player_y
+        self.bullet_y_speed_change = 10
+        self.bullet_x_pos_change = self.bullet_x
+        self.bullet_y_pos_change = self.bullet_y
 
-    # ENEMY [ALIEN]
-    # image for enemy
-    enemy_img = [pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png'),
-                    pygame.image.load('images/alien/alien_1.png')]
-    # coordinates are given such that player appears in the middle of screen
-
-    enemy_x = []
-    enemy_y = []
-    enemy_x_pos_change = []
-    enemy_y_pos_change = []
-    enemy_x_speed_change = []
-    enemy_y_speed_change = []
-    direction_for_enemy = []
-    for e in range(0,num_enemy):
-        enemy_x.append(random.randint(10,700))
-        enemy_y.append(random.randint(10,200))
-        direction_for_enemy.append(random.choice([-1,1]))
-        # we want enemy to move left and right
-        enemy_x_speed_change.append(3)
-        # we want enemy to go down when it hits boundary
-        enemy_y_speed_change.append(50)
-        enemy_x_pos_change.append(0)
-        enemy_y_pos_change.append(0)
-    # function for enemy
-    def enemy(i,x,y):
-        # to draw something on screen, blit is used
-        screen.blit(enemy_img[i],(x,y))
-
-    # BULLET
-    # bullet will have 2 states, when it is ready for fire
-    # and when it is fired
-    bullet_img = pygame.image.load('images/bullet/bullet_1.png')
-    # coordinates are given such that player appears in the middle of screen
-    bullet_x = player_x + 35
-    bullet_y = player_y
-    bullet_y_speed_change = 10
-    bullet_x_pos_change = bullet_x
-    bullet_y_pos_change = bullet_y
-    # ready state means we cannot see bullet on screen
-    # fire means the bullet is moving
-    # function for bullet
-    def bullet(x,y):
-        # to draw something on screen, blit is used
-        screen.blit(bullet_img,(x,y))
-
-    # COLLISION
-    def collision(e_x,e_y,b_x,b_y):
-        distance = math.sqrt((e_x-b_x)**2 + (e_y-b_y)**2)
-        if distance<40:
-            return True
-        return False
-
-    running = True
-    # GAME LOOP : makes sure that game is running infinitely
-    while running:
-        # if we want something to appear continuously, it should be in this loop
-        # screen.fill((48,34,75))
-        screen.blit(background_img,(0,0))
-        # exit condition
+    def quit_game(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-                break
-            # check for left and right arrow keys
-            # keydown means that if any key is pressed
-            if event.type == pygame.KEYDOWN:
-                # check if key pressed is left or right
-                if event.key == pygame.K_LEFT:
-                    player_x_pos_change = -1*player_x_speed_change
-                if event.key == pygame.K_RIGHT:
-                    player_x_pos_change = player_x_speed_change
-            # need to check the release of keys too
-            # keyup used for that
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    player_x_pos_change=0
+                self.game_over = True
 
-        # player movement
-        # once the key events are handled,
-        # we define boundaries as well as change the coordinates accordingly
-        player_x+=player_x_pos_change
-        if player_x<slack_left:
-            player_x=slack_left
-        if player_x>width-slack_right:
-            player_x=width-slack_right
-        player(player_x,player_y)
-        
-        # enemy movement
-        # for enemy we define random position, horizontal as well as
-        # vertical movement, also a check for boundaries is placed
-        # for e in range(0,num_enemy):
-        #     enemy(enemy_img,enemy_x[e],enemy_y[e])
-        for e in range(0,num_enemy):
-            # game over
-            if enemy_y[e]>500:
-                for e1 in range(0,num_enemy):
-                    enemy_y[e1] = 1000
-                bullet_y_speed_change = 0
-                bullet_y_pos_change = 1000 
-                bullet_x_pos_change = player_x + 35
-                game_over(250,250)
-                break
-            distance_from_player = math.sqrt((enemy_x[e]-player_x)**2 + (enemy_y[e]-player_y)**2)
-            if distance_from_player<50:
-                for e1 in range(0,num_enemy):
-                    enemy_y[e1] = 1000
-                bullet_y_speed_change = 0
-                bullet_y_pos_change = 1000 
-                bullet_x_pos_change = player_x + 35
-                game_over(250,250)
-                break
-
-            enemy(e,enemy_x[e],enemy_y[e])
-            enemy_x[e] += enemy_x_speed_change[e]*direction_for_enemy[e]
-            if enemy_x[e]>width-slack_right:
-                direction_for_enemy[e] = -1
-                enemy_y[e] += enemy_y_speed_change[e]
-            if enemy_x[e]<slack_left:
-                direction_for_enemy[e] = 1
-                enemy_y[e] += enemy_y_speed_change[e]
-
-            # collision detection
-            collided = collision(enemy_x[e],enemy_y[e],bullet_x_pos_change,bullet_y_pos_change)
-            if collided:
-                c_sound = mixer.Sound('audio/explosion.wav')
-                c_sound.play()
-                bullet_y_pos_change = bullet_y 
-                bullet_x_pos_change = player_x + 35
-                score += 1
-                if(score%10 == 0):
-                    enemy_x_speed_change[e]+=2
-                    enemy_y_speed_change[e]+=10
-                enemy_x[e] = random.randint(10,700)
-                enemy_y[e] = random.randint(10,200)
-                print(score)
-
-
-
-        # fire bullet as soon as previous one goes from screen
-        bullet(bullet_x_pos_change,bullet_y_pos_change)
-        bullet_y_pos_change-=bullet_y_speed_change
-        if bullet_y_pos_change<0:
-            bullet_sound = mixer.Sound('audio/laser.wav')
-            bullet_sound.play()
-            bullet_y_pos_change = bullet_y 
-            bullet_x_pos_change = player_x + 35
-        
-    
-        display_score(text_x,text_y)
-        # need to update everyone that is added (important)
+    def perform_one_step(self,action):
+        self.screen.blit(self.background_img,(0,0))
+        self.score_display(10,10)
         pygame.display.update()
 
-
-
-    #Getters and Setters and more functions
-    def is_game_over():
-        return game_over
-        
-
-    def restart_game():
-        # re-initialise variables define new function
-        game_over = False
-        player_x = 370
-        player_y = 480
-        direction_for_player = 1
-        player_x_speed_change = 5
-        player_y_speed_change = 1
-        player_x_pos_change = 0
-        player_y_pos_change = 0
-        enemy_x = []
-        enemy_y = []
-        enemy_x_pos_change = []
-        enemy_y_pos_change = []
-        enemy_x_speed_change = []
-        enemy_y_speed_change = []
-        direction_for_enemy = []   
-        bullet_x = player_x + 35
-        bullet_y = player_y
-        bullet_y_speed_change = 10
-        bullet_x_pos_change = bullet_x
-        bullet_y_pos_change = bullet_y 
-        running = True
-
-        # Now call function for starting while loop
-        return True
+    
