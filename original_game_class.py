@@ -12,16 +12,16 @@ class SpaceShooterGame:
         # game initializations
         self.height = 600
         self.width = 800
-        self.slack_right = width/10
-        self.slack_left = width/100
-        self.screen = pygame.display.set_mode((width,height))
-        self.mixer.music.load('audio/background.wav')
-        self.mixer.music.play(-1)
+        self.slack_right = self.width/10
+        self.slack_left = self.width/100
+        self.screen = pygame.display.set_mode((self.width,self.height))
+        mixer.music.load('audio/background.wav')
+        mixer.music.play(-1)
         self.c_sound = mixer.Sound('audio/explosion.wav')
         self.bullet_sound = mixer.Sound('audio/laser.wav')
-        self.pygame.display.set_caption('   Space Fighter')
+        pygame.display.set_caption('   Space Fighter')
         self.icon = pygame.image.load('images/icon/icon_ufo.png')
-        self.pygame.display.set_icon(icon)
+        pygame.display.set_icon(self.icon)
         self.font = pygame.font.Font('freesansbold.ttf',16)
 
         # load images
@@ -45,7 +45,6 @@ class SpaceShooterGame:
         #player
         self.player_x = (self.width-50)/2
         self.player_y = (self.height-self.height/5)
-        self.direction_for_player = 1
         self.player_x_speed_change = 5
         self.player_y_speed_change = 0
         #enemy
@@ -53,21 +52,19 @@ class SpaceShooterGame:
         self.enemy_y = []
         self.enemy_x_speed_change = []
         self.enemy_y_speed_change = []
-        self.direction_for_enemy = []
+        self.enemy_direction = []
         for e in range(0,self.num_enemy):
-            self.enemy_x.append(random.randint(self.width/100,self.width-self.width/10))
-            self.enemy_y.append(random.randint(self.height/90,self.height/70))
+            self.enemy_x.append(random.randint(int(self.width/100),int(self.width-self.width/10)))
+            self.enemy_y.append(random.randint(int(self.height/90),int(self.height/70)))
             self.enemy_direction.append(random.choice([-1,1]))
             self.enemy_x_speed_change.append(3)
             self.enemy_y_speed_change.append(50)
-            self.enemy_x_pos_change.append(0)
-            self.enemy_y_pos_change.append(0)
         # bullet
-        self.bullet_x = player_x + 35
-        self.bullet_y = player_y
+        self.bullet_x = self.player_x + 35
+        self.bullet_y = self.player_y
         self.bullet_y_speed_change = 10
-        self.bullet_x_pos_change = bullet_x
-        self.bullet_y_pos_change = bullet_y
+        self.bullet_x_pos_change = self.bullet_x
+        self.bullet_y_pos_change = self.bullet_y
     
     # SETTERS AND GETTERS
     # for game initializations
@@ -134,9 +131,9 @@ class SpaceShooterGame:
     def player(self,x,y):
         self.screen.blit(self.player_img,(x,y))
     def enemy(self,enemy_number,x,y):
-        screen.blit(self.enemy_img[enemy_number],(x,y))
+        self.screen.blit(self.enemy_img[enemy_number],(x,y))
     def bullet(self,x,y):
-        screen.blit(self.bullet_img,(x,y))
+        self.screen.blit(self.bullet_img,(x,y))
 
     # player movements (game controls)
     def move_left(self):
@@ -154,17 +151,17 @@ class SpaceShooterGame:
     def fire_bullet(self):
         self.bullet_y_pos_change-=self.bullet_y_speed_change
         if self.bullet_y_pos_change<0:
-            bullet_sound.play()
+            self.bullet_sound.play()
             self.bullet_y_pos_change = self.bullet_y 
             self.bullet_x_pos_change = self.player_x + 35
     def move_all_enemies(self):
         for e in range(0,self.num_enemy):
-            self.enemy_x[e] += self.enemy_x_speed_change[e]*self.direction_for_enemy[e]
+            self.enemy_x[e] += self.enemy_x_speed_change[e]*self.enemy_direction[e]
             if self.enemy_x[e]>self.width-self.slack_right:
-                self.direction_for_enemy[e] = -1
+                self.enemy_direction[e] = -1
                 self.enemy_y[e] += self.enemy_y_speed_change[e]
             if self.enemy_x[e]<self.slack_left:
-                self.direction_for_enemy[e] = 1
+                self.enemy_direction[e] = 1
                 self.enemy_y[e] += self.enemy_y_speed_change[e]
 
     # COLLISIONS & GAME OVER
@@ -204,7 +201,7 @@ class SpaceShooterGame:
     # GAME DISPLAYS
     def score_display(self,x,y):
         score_display = self.font.render("Score : "+str(self.score),True,(255,255,255))
-        screen.blit(score_display,(x,y))
+        self.screen.blit(score_display,(x,y))
     def game_over_display(self,x,y):
         self.game_over = True
         over_text = self.font.render('GAME OVER',True,(255,255,255))
@@ -215,9 +212,7 @@ class SpaceShooterGame:
         # RE-INITIALIZE
         # game variables
         self.game_over = False
-        self.high_score = 0
         self.score = 0
-        self.num_enemy = 6
 
         # component variables
         #player
@@ -230,7 +225,7 @@ class SpaceShooterGame:
         self.enemy_y = []
         self.enemy_x_speed_change = []
         self.enemy_y_speed_change = []
-        self.direction_for_enemy = []
+        self.enemy_direction = []
         for e in range(0,self.num_enemy):
             self.enemy_x.append(random.randint(self.width/100,self.width-self.width/10))
             self.enemy_y.append(random.randint(self.height/90,self.height/70))
@@ -238,27 +233,20 @@ class SpaceShooterGame:
             self.enemy_x_speed_change.append(3)
             self.enemy_y_speed_change.append(50)
         # bullet
-        self.bullet_x = player_x + 35
-        self.bullet_y = player_y
+        self.bullet_x = self.player_x + 35
+        self.bullet_y = self.player_y
         self.bullet_y_speed_change = 10
-        self.bullet_x_pos_change = bullet_x
-        self.bullet_y_pos_change = bullet_y
+        self.bullet_x_pos_change = self.bullet_x
+        self.bullet_y_pos_change = self.bullet_y
 
-
-
-
-
-    running = True
-    while running:
-        screen.blit(background_img,(0,0))
+    def quit_game(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-                break
-    
-        display_score(text_x,text_y)
-        # need to update everyone that is added (important)
-        pygame.display.update()
+                self.game_over = True
 
+    def perform_one_step(self,action):
+        self.screen.blit(self.background_img,(0,0))
+        self.score_display(10,10)
+        pygame.display.update()
 
     
