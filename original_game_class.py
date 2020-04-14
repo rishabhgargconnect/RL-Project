@@ -4,6 +4,8 @@ import pygame
 import random
 import math
 from pygame import mixer
+import cv2
+
 pygame.init()
 
 class SpaceShooterGame:
@@ -266,4 +268,21 @@ class SpaceShooterGame:
         self.score_display(10,10)
         pygame.display.update()
 
-    
+    def get_screenshot(self):
+        rect = pygame.Rect(0, 0, self.width, self.height)
+        pixels_matrix = pygame.surfarray.array3d(self.screen.subsurface(rect)).swapaxes(0,1)
+        self.preprocess_screenshot(pixels_matrix)
+        return pixels_matrix
+
+    def preprocess_screenshot(self, pixels_matrix):
+        grey_scale_screenshot = cv2.cvtColor(pixels_matrix, cv2.COLOR_RGB2GRAY)
+        #To save image
+        # cv2.imwrite('greyscale.jpg', grey_scale_screenshot)
+        grey_scale_screenshot_resized = cv2.resize(grey_scale_screenshot, (84,84)) 
+        grey_scale_screenshot_resized = np.reshape(grey_scale_screenshot_resized, (84,84,1))
+        grey_scale_screenshot_resized_transpose = np.transpose(grey_scale_screenshot_resized, (2,0,1))
+        grey_scale_screenshot_resized_transpose = grey_scale_screenshot_resized_transpose.astype(np.float32)
+        #to tensor object
+        grey_scale_screenshot_tensor = torch.from_numpy(grey_scale_screenshot_resized_transpose)
+        # print('grey_scale_screenshot_tensor = ', grey_scale_screenshot_tensor)
+        return grey_scale_screenshot_tensor
