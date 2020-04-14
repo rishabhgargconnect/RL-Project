@@ -5,6 +5,8 @@ import random
 import math
 from pygame import mixer
 import cv2
+import numpy as np
+import torch
 
 pygame.init()
 
@@ -59,7 +61,7 @@ class SpaceShooterGame:
             self.enemy_x.append(random.randint(int(self.width/100),int(self.width-self.width/10)))
             self.enemy_y.append(random.randint(int(self.height/90),int(self.height/70)))
             self.enemy_direction.append(random.choice([-1,1]))
-            self.enemy_x_speed_change.append(3)
+            self.enemy_x_speed_change.append(10)
             self.enemy_y_speed_change.append(50)
         # bullet
         self.bullet_x = self.player_x + 35

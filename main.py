@@ -82,18 +82,7 @@ import torch.optim as optim
 import time
 
 
-mode = 'train'
 
-if mode == 'train':
-    if not os.path.exists('pretrained-model/'):
-        os.mkdir('pretrained-model/')
-
-    model = NeuralNetwork()
-
-    model.apply(init_weights)
-    start = time.time()
-
-    train_network(model, start)
 
 
 
@@ -109,7 +98,7 @@ def train_network(model,start):
     game = SpaceShooterGame()
     replay_memory = []
     action = torch.zeros([model.number_of_actions], dtype=torch.float32)
-    action[0] = 1
+    action[1] = 1
     game.perform_one_step(action)
     image_data = game.preprocess_screenshot(game.get_screenshot())
     #stacking 4 images
@@ -123,6 +112,8 @@ def train_network(model,start):
             if game.high_score < game.score:
                 game.high_score = game.score
             game = SpaceShooterGame()
+            score_past = 0
+
         # taking output from model
         output = model(state)[0]
         action = torch.zeros([model.number_of_actions], dtype=torch.float32)
@@ -142,7 +133,6 @@ def train_network(model,start):
         reward = 0
         if game.score > score_past:
             reward = 1
-        score_past = game.score
         reward = torch.from_numpy(np.array([reward], dtype=np.float32)).unsqueeze(0)
         # terminal
         terminal = game.game_over
@@ -171,36 +161,79 @@ def train_network(model,start):
         loss = criterion(q_value, y_batch)
         loss.backward()
         optimizer.step()
-        # assign next state to state
+        # assign next state to state, change score
         state = state_1
+        score_past = game.score
+        # game.quit_game()
+        
         # save model , display result
-        if iteration % 1000 == 0:
-            print("iteration:", iteration, "score:", game.score, "high_score:", high_score, "elapsed time:", time.time() - start, "epsilon:", epsilon, "action:",
+        if iteration % 100 == 0:
+            print("iteration:", iteration, "score:", game.score, "past score:",score_past, "high_score:", game.high_score, "elapsed time:", time.time() - start, "epsilon:", epsilon, "action:",
                   action_index.cpu().detach().numpy(), "reward:", reward.numpy()[0][0], "Q max:",
-                  np.max(output.cpu().detach().numpy()), "avg_score:", avg_score)
+                  np.max(output.cpu().detach().numpy()))
 
             generation_score = []
-
-        if iteration % 100000 == 0:
+        if iteration % 1000 == 0:
             torch.save(model, "pretrained-model/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
 
-# def test_network(self):     
-
-
-
-for i in range(2):
-    # no need for restart, just make object for the game class again and run it
+def test_network(self):  
     game = SpaceShooterGame()
-    while game.get_game_over()==False:
-        actions = np.zeros((3))
-        actions[random.choice([0,1,2])]=1
-        # actions[2]=1
-        game.perform_one_step(actions)
-        input_image = game.get_screenshot()
-        game.preprocess_screenshot(input_image)
-        game.quit_game()
-    print('The end')
-        # pygame.display.update()
-    # game.restart_game()
+    action = torch.zeros([model.number_of_actions], dtype=torch.float32)
+    action[1] = 1
+    game.perform_one_step(action)
+    image_data = game.preprocess_screenshot(game.get_screenshot())
+    state = torch.cat((image_data, image_data, image_data, image_data)).unsqueeze(0) 
+    while not game.game_over:
+        # if game.game_over:
+        #     if game.high_score < game.score:
+        #         game.high_score = game.score
+        #     game = SpaceShooterGame()
+        #     score_past = 0
+        # taking output from model
+        output = model(state)[0]
+        action = torch.zeros([model.number_of_actions], dtype=torch.float32) 
+        # action
+        action_index = torch.argmax(output)
+        action[action_index] = 1
+        game.perform_one_step(action)
+        # state
+        image_data_1 = game.preprocess_screenshot(game.get_screenshot())
+        state_1 = torch.cat((state.squeeze(0)[1:, :, :], image_data_1)).unsqueeze(0)
+        state = state_1
+        # game.quit_game()
+        
+
+
+
+# if not os.path.exists('pretrained-model/'):
+#     os.mkdir('pretrained-model/')
+mode = 'train'
+if mode=='train':
+    model = NeuralNetwork()
+
+    model.apply(init_weights)
+    # init_weights(model)
+    start = time.time()
+
+    train_network(model, start)
+if mode=='test':
+    model = torch.load('pretrained-model/current_model_10000.pth').eval()
+    test_network(model)
+
+
+# for i in range(2):
+#     # no need for restart, just make object for the game class again and run it
+#     game = SpaceShooterGame()
+#     while game.get_game_over()==False:
+#         actions = np.zeros((3))
+#         actions[random.choice([0,1,2])]=1
+#         # actions[2]=1
+#         game.perform_one_step(actions)
+#         input_image = game.get_screenshot()
+#         game.preprocess_screenshot(input_image)
+#         game.quit_game()
+#     print('The end')
+#         # pygame.display.update()
+#     # game.restart_game()
