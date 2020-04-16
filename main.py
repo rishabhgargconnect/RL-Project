@@ -96,16 +96,18 @@ def train_network(model,start):
     epsilon = model.initial_epsilon
     iteration = 0
     score_past = game.score
+    high_score = 0
     epsilon_decrements = np.linspace(model.initial_epsilon, model.final_epsilon,model.number_of_iterations)
     while iteration < model.number_of_iterations:
         if game.game_over:
-            if game.high_score < game.score:
-                game.high_score = game.score
+            if high_score < game.score:
+                high_score = game.score
             game = SpaceShooterGame()
             score_past = 0
 
         # taking output from model
         output = model(state)[0]
+        # print(action)
         action = torch.zeros([model.number_of_actions], dtype=torch.float32)
         # epsilon-greedy policy for actions 
         random_action = random.random() <= epsilon
@@ -119,13 +121,15 @@ def train_network(model,start):
         image_data_1 = game.preprocess_screenshot(game.get_screenshot())
         state_1 = torch.cat((state.squeeze(0)[1:, :, :], image_data_1)).unsqueeze(0)
         action = action.unsqueeze(0)
+        # terminal
+        terminal = game.game_over
         # reward
         reward = 0
         if game.score > score_past:
             reward = 1
+        if terminal:
+            reward = -10
         reward = torch.from_numpy(np.array([reward], dtype=np.float32)).unsqueeze(0)
-        # terminal
-        terminal = game.game_over
         replay_memory.append((state, action, reward, state_1, terminal))
         # check length of replay memory
         if len(replay_memory) > model.replay_memory_size:
@@ -157,13 +161,17 @@ def train_network(model,start):
         # game.quit_game()
         
         # save model , display result
-        if iteration % 100 == 0:
+        if iteration % 500 == 0:
             print("iteration:", iteration, "score:", game.score, "past score:",score_past, "high_score:", game.high_score, "elapsed time:", time.time() - start, "epsilon:", epsilon, "action:",
                   action_index.cpu().detach().numpy(), "reward:", reward.numpy()[0][0], "Q max:",
                   np.max(output.cpu().detach().numpy()))
 
-            generation_score = []
-        if iteration % 1000 == 0:
+        # if reward == -10:
+        #     print('GAME OVER PUNISHMENT')
+        # if reward == 1:
+        #     print('REWARD FOR KILL')
+
+        if iteration % 10000 == 0:
             torch.save(model, "pretrained-model/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
@@ -203,15 +211,16 @@ def init_weights(m):
 
 if not os.path.exists('pretrained-model/'):
     os.mkdir('pretrained-model/')
+
 mode = 'train'
+
 if mode=='train':
     model = NeuralNetwork()
-
     model.apply(init_weights)
     # init_weights(model)
     start = time.time()
-
     train_network(model, start)
+
 if mode=='test':
     model = torch.load('pretrained-model/current_model_10000.pth').eval()
     test_network(model)

@@ -39,10 +39,10 @@ class NeuralNetwork(nn.Module):
         super(NeuralNetwork, self).__init__()
 
         self.number_of_actions = 3
-        self.gamma = 0.99
+        self.gamma = 0.5
         self.final_epsilon = 0.0001
-        self.initial_epsilon = 0.1
-        self.number_of_iterations = 10001
+        self.initial_epsilon = 0.9
+        self.number_of_iterations = 100001
         self.replay_memory_size = 10000
         self.minibatch_size = 32
 

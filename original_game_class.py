@@ -61,12 +61,12 @@ class SpaceShooterGame:
             self.enemy_x.append(random.randint(int(self.width/100),int(self.width-self.width/10)))
             self.enemy_y.append(random.randint(int(self.height/90),int(self.height/70)))
             self.enemy_direction.append(random.choice([-1,1]))
-            self.enemy_x_speed_change.append(10)
-            self.enemy_y_speed_change.append(50)
+            self.enemy_x_speed_change.append(15)
+            self.enemy_y_speed_change.append(10)
         # bullet
         self.bullet_x = self.player_x + 35
         self.bullet_y = self.player_y
-        self.bullet_y_speed_change = 5
+        self.bullet_y_speed_change = 15
         self.bullet_x_pos_change = self.bullet_x
         self.bullet_y_pos_change = self.bullet_y
     
@@ -141,13 +141,13 @@ class SpaceShooterGame:
 
     # player movements (game controls)
     def move_left(self):
-        self.player_x+= -1 * self.player_x_speed_change
+        self.player_x+= (-1 * self.player_x_speed_change)
         if self.player_x<self.slack_left:
             self.player_x=self.slack_left
     def move_right(self):
-        self.player_x+= 1 * self.player_x_speed_change
-        if self.player_x>self.slack_right:
-            self.player_x=self.slack_right
+        self.player_x+= (1 * self.player_x_speed_change)
+        if self.player_x>self.width-self.slack_right:
+            self.player_x=self.width-self.slack_right
     def no_action(self):
         self.player_x = self.player_x
     
@@ -160,6 +160,7 @@ class SpaceShooterGame:
             self.bullet_x_pos_change = self.player_x + 35
     def move_all_enemies(self,e):
         self.enemy_x[e] += self.enemy_x_speed_change[e]*self.enemy_direction[e]
+        self.enemy_y[e] += 2
         if self.enemy_x[e]>self.width-self.slack_right:
             self.enemy_direction[e] = -1
             self.enemy_y[e] += self.enemy_y_speed_change[e]
@@ -180,10 +181,10 @@ class SpaceShooterGame:
             self.enemy_x[e] = random.randint(int(self.width/100),int(self.width-self.width/10))
             self.enemy_y[e] = random.randint(int(self.height/90),int(self.height/70))
             self.enemy_direction[e] = random.choice([-1,1])
-            print(self.score)
+            # print(self.score)
     def check_collision_enemy_player(self,e):
         distance_from_player = math.sqrt((self.enemy_x[e]-self.player_x)**2 + (self.enemy_y[e]-self.player_y)**2)
-        if distance_from_player<50:
+        if distance_from_player<80:
             self.game_over = True
             for e1 in range(0,self.num_enemy):
                 self.enemy_y[e1] = self.height + 1000
@@ -191,7 +192,7 @@ class SpaceShooterGame:
             self.bullet_y_pos_change = self.height + 1000 
             self.game_over_display(self.height/2,self.width/2)
     def check_enemy_game_over_boundary(self,e):
-        if self.enemy_y[e]>self.height-self.height/10:
+        if self.enemy_y[e]>self.height-self.height/5:
             self.game_over = True
             for e1 in range(0,self.num_enemy):
                 self.enemy_y[e1] = self.height + 1000
