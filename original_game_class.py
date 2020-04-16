@@ -12,6 +12,8 @@ pygame.init()
 class SpaceShooterGame:
     def __init__(self):
 
+        #TODO
+        self.reward = 0.1
         # game initializations
         self.height = 500
         self.width = 600
@@ -268,6 +270,7 @@ class SpaceShooterGame:
 
         self.score_display(10,10)
         pygame.display.update()
+        return self.get_screenshot(), self.reward, self.get_game_over
 
 
 
@@ -304,13 +307,13 @@ class SpaceShooterGame:
         grey_scale_screenshot_resized_transpose = grey_scale_screenshot_resized_transpose.astype(np.float32)
 
         #to tensor object
-        grey_scale_screenshot_tensor = torch.from_numpy(grey_scale_screenshot_resized_transpose)
+        # grey_scale_screenshot_tensor = torch.from_numpy(grey_scale_screenshot_resized_transpose)
 
 
 
-        print('grey_scale_screenshot_tensor = ', grey_scale_screenshot_tensor)
+        # print('grey_scale_screenshot_tensor = ', grey_scale_screenshot_tensor)
 
-        return grey_scale_screenshot_tensor
+        return grey_scale_screenshot_resized_transpose
 
 
 
