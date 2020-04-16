@@ -82,16 +82,6 @@ import torch.optim as optim
 import time
 
 
-
-
-
-
-
-def init_weights(m):
-    if type(m) == nn.Conv2d or type(m) == nn.Linear:
-        torch.nn.init.uniform(m.weight, -0.01, 0.01)
-        m.bias.data.fill_(0.01)
-
 def train_network(model,start):        
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
@@ -204,11 +194,15 @@ def test_network(self):
         state = state_1
         # game.quit_game()
         
+def init_weights(m):
+    if type(m) == nn.Conv2d or type(m) == nn.Linear:
+        torch.nn.init.uniform(m.weight, -0.01, 0.01)
+        m.bias.data.fill_(0.01)
 
 
 
-# if not os.path.exists('pretrained-model/'):
-#     os.mkdir('pretrained-model/')
+if not os.path.exists('pretrained-model/'):
+    os.mkdir('pretrained-model/')
 mode = 'train'
 if mode=='train':
     model = NeuralNetwork()
