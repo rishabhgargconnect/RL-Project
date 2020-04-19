@@ -19,10 +19,12 @@ class SpaceShooterGame:
         self.slack_right = self.width/10
         self.slack_left = self.width/100
         self.screen = pygame.display.set_mode((self.width,self.height))
-        mixer.music.load('audio/background.wav')
-        mixer.music.play(-1)
-        self.c_sound = mixer.Sound('audio/explosion.wav')
-        self.bullet_sound = mixer.Sound('audio/laser.wav')
+
+        self.reward = 0
+        # mixer.music.load('audio/background.wav')
+        # mixer.music.play(-1)
+        # self.c_sound = mixer.Sound('audio/explosion.wav')
+        # self.bullet_sound = mixer.Sound('audio/laser.wav')
         pygame.display.set_caption('   Space Fighter')
         self.icon = pygame.image.load('images/icon/icon_ufo.png')
         pygame.display.set_icon(self.icon)
@@ -61,12 +63,12 @@ class SpaceShooterGame:
             self.enemy_x.append(random.randint(int(self.width/100),int(self.width-self.width/10)))
             self.enemy_y.append(random.randint(int(self.height/90),int(self.height/70)))
             self.enemy_direction.append(random.choice([-1,1]))
-            self.enemy_x_speed_change.append(15)
-            self.enemy_y_speed_change.append(10)
+            self.enemy_x_speed_change.append(5)
+            self.enemy_y_speed_change.append(1)
         # bullet
         self.bullet_x = self.player_x + 35
         self.bullet_y = self.player_y
-        self.bullet_y_speed_change = 15
+        self.bullet_y_speed_change = 10
         self.bullet_x_pos_change = self.bullet_x
         self.bullet_y_pos_change = self.bullet_y
     
@@ -155,12 +157,12 @@ class SpaceShooterGame:
     def fire_bullet(self):
         self.bullet_y_pos_change-=self.bullet_y_speed_change
         if self.bullet_y_pos_change<0:
-            self.bullet_sound.play()
+            # self.bullet_sound.play()
             self.bullet_y_pos_change = self.bullet_y 
             self.bullet_x_pos_change = self.player_x + 35
     def move_all_enemies(self,e):
         self.enemy_x[e] += self.enemy_x_speed_change[e]*self.enemy_direction[e]
-        self.enemy_y[e] += 2
+        self.enemy_y[e] += 0.5
         if self.enemy_x[e]>self.width-self.slack_right:
             self.enemy_direction[e] = -1
             self.enemy_y[e] += self.enemy_y_speed_change[e]
@@ -174,7 +176,8 @@ class SpaceShooterGame:
         return math.sqrt((e_x-b_x)**2 + (e_y-b_y)**2)<40
     def update_collision_effects(self,e):
         if self.check_collision_enemy_bullet(self.enemy_x[e],self.enemy_y[e],self.bullet_x_pos_change,self.bullet_y_pos_change):
-            self.c_sound.play()
+            # self.c_sound.play()
+            self.reward = 1 + self.enemy_y[e]/100
             self.bullet_y_pos_change = self.bullet_y 
             self.bullet_x_pos_change = self.player_x + 35
             self.score += 1
@@ -200,6 +203,10 @@ class SpaceShooterGame:
             self.bullet_y_pos_change = self.height + 1000 
             self.bullet_x_pos_change = self.player_x + 35
             self.game_over_display(self.height/2,self.width/2)
+
+    # Fetch reward
+    def get_reward(self):
+        return self.reward        
         
     # GAME DISPLAYS
     def score_display(self,x,y):
