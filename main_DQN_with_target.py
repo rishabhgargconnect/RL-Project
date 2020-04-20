@@ -187,7 +187,7 @@ def train_network(model,target_model,start):
         #     print('REWARD FOR KILL')
 
         if iteration % 10000 == 0:
-            torch.save(target_model, "pretrained-model2/current_model_" + str(iteration) + ".pth")
+            torch.save(target_model, "pretrained-model_DQN_with_target/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
 
@@ -224,10 +224,10 @@ def init_weights(m):
 
 
 
-if not os.path.exists('pretrained-model2/'):
-    os.mkdir('pretrained-model2/')
+if not os.path.exists('pretrained-model_DQN_with_target/'):
+    os.mkdir('pretrained-model_DQN_with_target/')
 
-mode = 'train'
+mode = 'test'
 
 if mode=='train':
     model = NeuralNetwork()
@@ -239,7 +239,7 @@ if mode=='train':
     train_network(model,target_model, start)
 
 if mode=='test':
-    model = torch.load('pretrained-model2/current_model_90000.pth').eval()
+    model = torch.load('pretrained-model_DQN_with_target/current_model_150000.pth').eval()
     test_network(model)
 
 
