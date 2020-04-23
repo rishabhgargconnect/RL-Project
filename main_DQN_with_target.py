@@ -191,7 +191,7 @@ def train_network(model,target_model,start):
 
         iteration += 1
 
-def test_network(self):  
+def test_network(model):  
     game = SpaceShooterGame()
     action = torch.zeros([model.number_of_actions], dtype=torch.float32)
     action[1] = 1
@@ -216,6 +216,7 @@ def test_network(self):
         state_1 = torch.cat((state.squeeze(0)[1:, :, :], image_data_1)).unsqueeze(0)
         state = state_1
         # game.quit_game()
+    return game.score
         
 def init_weights(m):
     if type(m) == nn.Conv2d or type(m) == nn.Linear:
@@ -238,10 +239,21 @@ if mode=='train':
     start = time.time()
     train_network(model,target_model, start)
 
+# bullet speed = 10, player speed = 5, enemy speed x = 5, enemy spped y = 0.5
+iterations = [50000,100000,150000,200000]
+# iterations = range(100000,200000,10000)
 if mode=='test':
-    model = torch.load('pretrained-model_DQN_with_target/current_model_150000.pth').eval()
-    test_network(model)
-
+    for iter in iterations:
+        final_score = 0
+        max = 0
+        for i in range(100):
+            model = torch.load('pretrained-model_DQN_with_target/current_model_'+str(iter)+'.pth').eval()
+            score = test_network(model)
+            final_score+=score
+            if score>max:
+                max = score
+        print(final_score/100)
+        print('high score = ',max)
 
 # for i in range(2):
 #     # no need for restart, just make object for the game class again and run it
