@@ -173,7 +173,7 @@ def train_network(model,target_model,start):
         # game.quit_game()
 
         if iteration % model.C==0:
-            print('model copied')
+            # print('model copied')
             # print('model = ',list(model.parameters()))
             # print('target model = ',list(target_model.parameters()))
             target_model = copy.deepcopy(model)
@@ -181,7 +181,7 @@ def train_network(model,target_model,start):
             # print('after target model = ',list(target_model.parameters()))
         
         # save model , display result
-        if iteration % 500 == 0:
+        if iteration % 1000 == 0:
             print("iteration:", iteration, "score:", game.score, "past score:",score_past, "high_score:", high_score, "elapsed time:", time.time() - start, "epsilon:", epsilon, "action:",
                   action_index.cpu().detach().numpy(), "reward:", reward.numpy()[0][0], "Q max:",
                   np.max(output.cpu().detach().numpy()))
@@ -192,7 +192,7 @@ def train_network(model,target_model,start):
         #     print('REWARD FOR KILL')
 
         if iteration % 10000 == 0:
-            torch.save(target_model, "pretrained-model2/current_model_" + str(iteration) + ".pth")
+            torch.save(target_model, "pretrained-model-ddqn-g0.99-b64-C200-e0.1/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
 
@@ -230,8 +230,8 @@ def init_weights(m):
 
 
 
-if not os.path.exists('pretrained-model2/'):
-    os.mkdir('pretrained-model2/')
+if not os.path.exists('pretrained-model-ddqn-g0.99-b64-C200-e0.1/'):
+    os.mkdir('pretrained-model-ddqn-g0.99-b64-C200-e0.1/')
 
 mode = 'test'
 
@@ -245,13 +245,13 @@ if mode=='train':
     train_network(model,target_model, start)
 
 # iterations = range(100000,200000,10000)
-iterations = [50000,100000,150000,200000]
+iterations = [150000,200000]
 if mode=='test':
     for iter in iterations:
         final_score = 0
         max = 0
         for i in range(100):
-            model = torch.load('pretrained-model-ddqn/current_model_'+str(iter)+'.pth').eval()
+            model = torch.load('pretrained-model-ddqn-g0.95-b32-C100-e0.1/current_model_'+str(iter)+'.pth').eval()
             score = test_network(model)
             final_score+= score
             if score>max:

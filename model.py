@@ -44,8 +44,8 @@ class NeuralNetwork(nn.Module):
         self.initial_epsilon = 0.1
         self.number_of_iterations = 200001
         self.replay_memory_size = 10000
-        self.minibatch_size = 32
-        self.C = 100
+        self.minibatch_size = 64
+        self.C = 200
 
         self.conv1 = nn.Conv2d(4, 32, 8, 4)
         self.relu1 = nn.ReLU(inplace=True)
