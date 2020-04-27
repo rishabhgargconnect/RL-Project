@@ -192,11 +192,11 @@ def train_network(model,target_model,start):
         #     print('REWARD FOR KILL')
 
         if iteration % 10000 == 0:
-            torch.save(target_model, "pretrained-model-ddqn-gamma0.99-batchsize64-C100-epsilon0.1/current_model_" + str(iteration) + ".pth")
+            torch.save(target_model, "pretrained-model-ddqn-gamma0.95-batchsize64-C100-epsilon0.1/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
 
-def test_network(self):  
+def test_network(model):  
     game = SpaceShooterGame()
     action = torch.zeros([model.number_of_actions], dtype=torch.float32)
     action[1] = 1
@@ -220,8 +220,9 @@ def test_network(self):
         image_data_1 = game.preprocess_screenshot(game.get_screenshot())
         state_1 = torch.cat((state.squeeze(0)[1:, :, :], image_data_1)).unsqueeze(0)
         state = state_1
-    print("score =", game.score)    
+    # print("score =", game.score)    
         # game.quit_game()
+    return game.score
         
 def init_weights(m):
     if type(m) == nn.Conv2d or type(m) == nn.Linear:
@@ -230,10 +231,10 @@ def init_weights(m):
 
 
 
-if not os.path.exists('pretrained-model-ddqn-gamma0.99-batchsize64-C100-epsilon0.1/'):
-    os.mkdir('pretrained-model-ddqn-gamma0.99-batchsize64-C100-epsilon0.1/')
+if not os.path.exists('pretrained-model-ddqn-gamma0.95-batchsize64-C100-epsilon0.1/'):
+    os.mkdir('pretrained-model-ddqn-gamma0.95-batchsize64-C100-epsilon0.1/')
 
-mode = 'train'
+mode = 'test'
 
 if mode=='train':
     model = NeuralNetwork()
@@ -245,8 +246,19 @@ if mode=='train':
     train_network(model,target_model, start)
 
 if mode=='test':
-    model = torch.load('pretrained-model-ddqn-gamma0.99-batchsize64-C100-epsilon0.1/current_model_200000.pth').eval()
-    test_network(model)
+    iterations = [200000]
+    for iter in iterations:
+        final_score = 0
+        max = 0
+        for i in range(100):
+            model = torch.load('pretrained-model-ddqn-gamma0.99-batchsize32-C100-epsilon0.2/current_model_'+str(iter)+'.pth').eval()
+            score = test_network(model)
+            final_score+=score
+            if score>max:
+                max=score
+        print('average score = ',final_score/100)
+        print('high score = ',max)
+    # test_network(model)
 
 
 # for i in range(2):

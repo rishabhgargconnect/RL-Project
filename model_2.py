@@ -46,8 +46,8 @@ class SpaceShooterDQN:
         self.replay_memory = []
         self.alpha = 0.2
         self.epsilon = 0.1
-        self.gamma = 0.9
-        self.batch_size = 32
+        self.gamma = 0.95
+        self.batch_size = 64
         self.layers = [32]
         self.update_target_estimator_every = 100
 
