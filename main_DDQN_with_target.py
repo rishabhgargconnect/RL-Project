@@ -75,7 +75,8 @@ import random
 from original_game_class import SpaceShooterGame
 import os
 from model import NeuralNetwork
-
+  
+from matplotlib import pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -83,6 +84,10 @@ import time
 import copy
 
 high_score = 0
+q_max_vals_list = []
+scores_list = []
+episode_length_list = []
+reward_list = []
 def train_network(model,target_model,start):        
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
@@ -99,8 +104,23 @@ def train_network(model,target_model,start):
     score_past = game.score
     high_score=0
     epsilon_decrements = np.linspace(model.initial_epsilon, model.final_epsilon,model.number_of_iterations)
+    global q_max_vals_list
+    global scores_list
+    global episode_length_list
+    global reward_list 
+    count_episode_length = 0
+    count_episode_reward = 0
+    count_episode_q_max = 0
     while iteration < model.number_of_iterations:
         if game.game_over:
+            print(q_max_vals_list,scores_list,episode_length_list,reward_list)
+            q_max_vals_list.append(count_episode_q_max)
+            scores_list.append(game.score)
+            episode_length_list.append(count_episode_length)
+            reward_list.append(count_episode_reward)
+            count_episode_length = 0
+            count_episode_reward = 0
+            count_episode_q_max = 0
             if high_score < game.score:
                 high_score = game.score
             game = SpaceShooterGame()
@@ -185,16 +205,21 @@ def train_network(model,target_model,start):
             print("iteration:", iteration, "score:", game.score, "past score:",score_past, "high_score:", high_score, "elapsed time:", time.time() - start, "epsilon:", epsilon, "action:",
                   action_index.cpu().detach().numpy(), "reward:", reward.numpy()[0][0], "Q max:",
                   np.max(output.cpu().detach().numpy()))
-
+        
+        count_episode_length+=1
+        count_episode_q_max+=np.max(output.cpu().detach().numpy())
+        count_episode_reward+=reward.numpy()[0][0]
+        
         # if reward == -10:
         #     print('GAME OVER PUNISHMENT')
         # if reward == 1:
         #     print('REWARD FOR KILL')
 
         if iteration % 10000 == 0:
-            torch.save(target_model, "pretrained-model-ddqn-g0.99-b64-C200-e0.1/current_model_" + str(iteration) + ".pth")
+            torch.save(target_model, "pretrained-model-ddqn-sample/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
+
 
 def test_network(model):  
     game = SpaceShooterGame()
@@ -230,8 +255,8 @@ def init_weights(m):
 
 
 
-if not os.path.exists('pretrained-model-ddqn-g0.99-b64-C200-e0.1/'):
-    os.mkdir('pretrained-model-ddqn-g0.99-b64-C200-e0.1/')
+if not os.path.exists('pretrained-model-ddqn-sample/'):
+    os.mkdir('pretrained-model-ddqn-sample/')
 
 mode = 'test'
 
@@ -243,6 +268,35 @@ if mode=='train':
     # init_weights(model)
     start = time.time()
     train_network(model,target_model, start)
+    print(q_max_vals_list)
+    plt.plot(range(len(q_max_vals_list)),q_max_vals_list)
+    plt.xlabel('episode')
+    plt.ylabel('Q max Values')
+    plt.legend('Plot for Episode and Q max values')
+    plt.savefig('pretrained-model-ddqn-sample/q_val.png')
+    plt.show()
+    print(reward_list)
+    plt.plot(range(len(reward_list)),reward_list)
+    plt.xlabel('episode')
+    plt.ylabel('rewards')
+    plt.legend('Plot for Episode and Total Reward')
+    plt.savefig('pretrained-model-ddqn-sample/reward.png')
+    plt.show()
+    print(scores_list)
+    plt.plot(range(len(scores_list)),scores_list)
+    plt.xlabel('episode')
+    plt.ylabel('scores')
+    plt.legend('Plot for Episode and score')
+    plt.savefig('pretrained-model-ddqn-sample/score.png')
+    plt.show()
+    print(episode_length_list)
+    plt.plot(range(len(episode_length_list)),episode_length_list)
+    plt.xlabel('episode')
+    plt.ylabel('episode length')
+    plt.legend('Plot for Episode and episode length')
+    plt.savefig('pretrained-model-ddqn-sample/length.png')
+    plt.show()
+
 
 # iterations = range(100000,200000,10000)
 iterations = [150000,200000]
@@ -251,7 +305,7 @@ if mode=='test':
         final_score = 0
         max = 0
         for i in range(100):
-            model = torch.load('pretrained-model-ddqn-g0.95-b32-C100-e0.1/current_model_'+str(iter)+'.pth').eval()
+            model = torch.load('pretrained-model-ddqn-g0.99-b64-C100-e0.2/current_model_'+str(iter)+'.pth').eval()
             score = test_network(model)
             final_score+= score
             if score>max:
