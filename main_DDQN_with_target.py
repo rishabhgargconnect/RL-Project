@@ -113,7 +113,7 @@ def train_network(model,target_model,start):
     count_episode_q_max = 0
     while iteration < model.number_of_iterations:
         if game.game_over:
-            print(q_max_vals_list,scores_list,episode_length_list,reward_list)
+            # print(q_max_vals_list,scores_list,episode_length_list,reward_list)
             q_max_vals_list.append(count_episode_q_max)
             scores_list.append(game.score)
             episode_length_list.append(count_episode_length)
@@ -216,7 +216,7 @@ def train_network(model,target_model,start):
         #     print('REWARD FOR KILL')
 
         if iteration % 10000 == 0:
-            torch.save(target_model, "pretrained-model-ddqn-sample/current_model_" + str(iteration) + ".pth")
+            torch.save(target_model, "pretrained-model-ddqn-bullet-double-20/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
 
@@ -255,8 +255,8 @@ def init_weights(m):
 
 
 
-if not os.path.exists('pretrained-model-ddqn-sample/'):
-    os.mkdir('pretrained-model-ddqn-sample/')
+if not os.path.exists('pretrained-model-ddqn-bullet-double-20/'):
+    os.mkdir('pretrained-model-ddqn-bullet-double-20/')
 
 mode = 'test'
 
@@ -268,50 +268,59 @@ if mode=='train':
     # init_weights(model)
     start = time.time()
     train_network(model,target_model, start)
-    print(q_max_vals_list)
+    print('bullet speed')
+    # print(q_max_vals_list)
+    plt.figure()
     plt.plot(range(len(q_max_vals_list)),q_max_vals_list)
     plt.xlabel('episode')
     plt.ylabel('Q max Values')
     plt.legend('Plot for Episode and Q max values')
-    plt.savefig('pretrained-model-ddqn-sample/q_val.png')
-    plt.show()
-    print(reward_list)
+    plt.savefig('pretrained-model-ddqn-bullet-double-20/q_val.png')
+    # plt.show()
+    # print(reward_list)
+    plt.figure()
     plt.plot(range(len(reward_list)),reward_list)
     plt.xlabel('episode')
     plt.ylabel('rewards')
     plt.legend('Plot for Episode and Total Reward')
-    plt.savefig('pretrained-model-ddqn-sample/reward.png')
-    plt.show()
-    print(scores_list)
+    plt.savefig('pretrained-model-ddqn-bullet-double-20/reward.png')
+    # plt.show()
+    # print(scores_list)
+    plt.figure()
     plt.plot(range(len(scores_list)),scores_list)
     plt.xlabel('episode')
     plt.ylabel('scores')
     plt.legend('Plot for Episode and score')
-    plt.savefig('pretrained-model-ddqn-sample/score.png')
-    plt.show()
-    print(episode_length_list)
+    plt.savefig('pretrained-model-ddqn-bullet-double-20/score.png')
+    # plt.show()
+    # print(episode_length_list)
+    plt.figure()
     plt.plot(range(len(episode_length_list)),episode_length_list)
     plt.xlabel('episode')
     plt.ylabel('episode length')
     plt.legend('Plot for Episode and episode length')
-    plt.savefig('pretrained-model-ddqn-sample/length.png')
-    plt.show()
+    plt.savefig('pretrained-model-ddqn-bullet-double-20/length.png')
+    # plt.show()
 
 
 # iterations = range(100000,200000,10000)
-iterations = [150000,200000]
+iterations = [200000]
 if mode=='test':
+    start = time.time()
+    # print('start = ',start)
     for iter in iterations:
         final_score = 0
         max = 0
-        for i in range(100):
-            model = torch.load('pretrained-model-ddqn-g0.99-b64-C100-e0.2/current_model_'+str(iter)+'.pth').eval()
+        for i in range(5):
+            model = torch.load('pretrained-model-ddqn-bullet-double-20/current_model_'+str(iter)+'.pth').eval()
             score = test_network(model)
             final_score+= score
+            print(score)
             if score>max:
                 max = score
-        print('average score = ',final_score/100)
+        print('average score = ',final_score/5)
         print('high score = ',max)
+        print('time taken = ', time.time() - start)
 
 
 # for i in range(2):
@@ -328,3 +337,4 @@ if mode=='test':
 #     print('The end')
 #         # pygame.display.update()
 #     # game.restart_game()
+

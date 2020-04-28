@@ -68,7 +68,7 @@ class SpaceShooterGame:
         # bullet
         self.bullet_x = self.player_x + 35
         self.bullet_y = self.player_y
-        self.bullet_y_speed_change = 10
+        self.bullet_y_speed_change = 20
         self.bullet_x_pos_change = self.bullet_x
         self.bullet_y_pos_change = self.bullet_y
     

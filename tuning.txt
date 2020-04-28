@@ -2,3 +2,14 @@ GRAPHS :
 iteration vs q-vals
 episode vs score
 time vs episode length
+
+
+
+
+ALL THAT IS DONE
+
+- tuning the model : gamma, C, epsilon, batch
+- tuning the game : reward of 1 if alien is killed (performance was okay),
+ rewards increase according to the closeness of alien to player (performance improved)
+ sparse rewards (worse), increase bullet speed (better), 
+increase bullet & alien speed (good), increase bullet, alien & player speed (lets see) 
