@@ -82,12 +82,16 @@ import torch.nn as nn
 import torch.optim as optim
 import time
 import copy
+import sys
 
 high_score = 0
 q_max_vals_list = []
 scores_list = []
 episode_length_list = []
 reward_list = []
+args = sys.argv
+
+model_folder = args[2]
 def train_network(model,target_model,start):        
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
@@ -216,7 +220,7 @@ def train_network(model,target_model,start):
         #     print('REWARD FOR KILL')
 
         if iteration % 10000 == 0:
-            torch.save(target_model, "pretrained-model-ddqn-sample/current_model_" + str(iteration) + ".pth")
+            torch.save(target_model, model_folder+"/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
 
@@ -255,10 +259,11 @@ def init_weights(m):
 
 
 
-if not os.path.exists('pretrained-model-ddqn-sample/'):
-    os.mkdir('pretrained-model-ddqn-sample/')
+if not os.path.exists(model_folder+'/'):
+    os.mkdir(model_folder+'/')
 
-mode = 'test'
+
+mode = args[1]
 
 if mode=='train':
     model = NeuralNetwork()
@@ -273,28 +278,28 @@ if mode=='train':
     plt.xlabel('episode')
     plt.ylabel('Q max Values')
     plt.legend('Plot for Episode and Q max values')
-    plt.savefig('pretrained-model-ddqn-sample/q_val.png')
+    plt.savefig(model_folder+'/q_val.png')
     plt.show()
     print(reward_list)
     plt.plot(range(len(reward_list)),reward_list)
     plt.xlabel('episode')
     plt.ylabel('rewards')
     plt.legend('Plot for Episode and Total Reward')
-    plt.savefig('pretrained-model-ddqn-sample/reward.png')
+    plt.savefig(model_folder+'/reward.png')
     plt.show()
     print(scores_list)
     plt.plot(range(len(scores_list)),scores_list)
     plt.xlabel('episode')
     plt.ylabel('scores')
     plt.legend('Plot for Episode and score')
-    plt.savefig('pretrained-model-ddqn-sample/score.png')
+    plt.savefig(model_folder+'/score.png')
     plt.show()
     print(episode_length_list)
     plt.plot(range(len(episode_length_list)),episode_length_list)
     plt.xlabel('episode')
     plt.ylabel('episode length')
     plt.legend('Plot for Episode and episode length')
-    plt.savefig('pretrained-model-ddqn-sample/length.png')
+    plt.savefig(model_folder+'/length.png')
     plt.show()
 
 
@@ -305,7 +310,7 @@ if mode=='test':
         final_score = 0
         max = 0
         for i in range(100):
-            model = torch.load('pretrained-model-ddqn-g0.99-b64-C100-e0.2/current_model_'+str(iter)+'.pth').eval()
+            model = torch.load(model_folder+'/current_model_'+str(iter)+'.pth').eval()
             score = test_network(model)
             final_score+= score
             if score>max:
