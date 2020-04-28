@@ -81,8 +81,12 @@ import torch.nn as nn
 import torch.optim as optim
 import time
 import copy
+import sys
 
 high_score = 0
+args = sys.argv
+
+model_folder = args[2]
 def train_network(model,target_model,start):        
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
@@ -187,7 +191,7 @@ def train_network(model,target_model,start):
         #     print('REWARD FOR KILL')
 
         if iteration % 10000 == 0:
-            torch.save(target_model, "pretrained-model_DQN_with_target/current_model_" + str(iteration) + ".pth")
+            torch.save(target_model, model_folder+"/current_model_" + str(iteration) + ".pth")
 
         iteration += 1
 
@@ -225,8 +229,8 @@ def init_weights(m):
 
 
 
-if not os.path.exists('pretrained-model_DQN_with_target/'):
-    os.mkdir('pretrained-model_DQN_with_target/')
+if not os.path.exists(model_folder+'/'):
+    os.mkdir(model_folder+'/')
 
 mode = 'test'
 
@@ -247,7 +251,7 @@ if mode=='test':
         final_score = 0
         max = 0
         for i in range(100):
-            model = torch.load('pretrained-model_DQN_with_target/current_model_'+str(iter)+'.pth').eval()
+            model = torch.load(model_folder+'/current_model_'+str(iter)+'.pth').eval()
             score = test_network(model)
             final_score+=score
             if score>max:
