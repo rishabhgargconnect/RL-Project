@@ -22,3 +22,10 @@ where , <br>
 
 Sample Command:<br>
 <b> python main_DDQN_with_target.py test trained-model-ddqn-g0.99-b32-C100-e0.1_DONE</b>
+
+### Useful links
+
+Link to the presentation : https://docs.google.com/presentation/d/1D648ZiN4Xq99z6Nas_p9rVewA3zQmLMoBguTfKOmXXY/edit#slide=id.g845012c340_1_31
+
+Link to the youtube video : https://www.youtube.com/watch?v=HvfSGqtO1VU
+
